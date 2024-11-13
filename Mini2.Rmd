@@ -1,0 +1,101 @@
+---
+title: "Mini2"
+author: "Mishal Rai"
+date: "2024-04-15"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+## Introduction
+
+The research question posed in this analysis is whether the "Number of Days Physical Health was Not Good" is greater in males compared to females.
+This question aims to investigate potential disparities in physical health between genders and understand if there are differences that require tailored interventions.
+By focusing on this specific aspect of health, the analysis seeks to uncover insights into potential gender-based health inequalities and inform targeted intervention strategies.
+Studying this research question is important for several reasons.
+Firstly, it contributes to our understanding of gender-specific health disparities, which is essential for promoting health equity and improving overall population health.
+Identifying whether males or females experience more days of poor physical health can help policymakers and healthcare providers allocate resources effectively and develop targeted interventions to address the specific needs of different demographic groups.
+Additionally, understanding these differences can aid in the development of preventive health initiatives aimed at reducing the burden of chronic conditions and improving overall quality of life.
+The research may impact a wide range of stakeholders, including public health officials, policymakers, healthcare providers, advocacy groups, and individuals themselves.
+Public health officials and policymakers can use the findings to inform health policy decisions and allocate resources to address gender-specific health disparities effectively.
+Healthcare providers can use the information to tailor their interventions and treatment plans to better meet the needs of their patients, ultimately improving health outcomes.
+Advocacy groups may use the results to advocate for targeted health interventions and programs that address the specific needs of different demographic groups.
+Finally, individuals may benefit from increased awareness of gender-specific health risks and opportunities for preventive care.
+In an institutional setting, the results of this analysis could have a significant impact on patient care.
+Healthcare institutions can use the findings to implement gender-sensitive approaches to care delivery, ensuring that interventions are tailored to meet the specific needs of male and female patients.
+For example, if the analysis reveals that males experience more days of poor physical health, healthcare providers may prioritize preventive screenings, health education, and lifestyle interventions targeted at addressing the underlying factors contributing to this disparity.
+By implementing gender-specific interventions, healthcare institutions can improve patient outcomes, enhance patient satisfaction, and ultimately promote health equity across diverse patient populations.
+
+## Data Cleaning & Exploratory Data Analysis
+
+The analysis utilizes the BRFSS 2010 survey (Behavioral Risk Factor Surveillance System) dataset.
+BRFSS is an annual telephone survey by the CDC that gathers data on health-related behaviors, chronic conditions, and preventive services among US adults. Data cleaning involved several steps: 
+The PHYSHLTH variable was recoded to replace values indicating "None" (88), "Don’t know/Not sure" (77), or "Refused" (99) with NA, accomplished using the replace() function. Additionally, the SEX variable was recoded into a new variable, SEX2, with 1 denoting "Male" and 2 denoting "Female", implemented through the ifelse() function. A sample of the recoded PHYSHLTH variable was inspected using head() to ensure the values 88, 77, and 99 were properly replaced with NA. Similarly, a sample of the recoded SEX variable was reviewed alongside the original SEX variable to confirm correct recoding. Following recoding, the mean of the PHYSHLTH variable was calculated to be approximately 15. The dataset comprised around 31% males and 69% females.
+In conclusion, the dataset encompassed 3260 observations and 397 variables. Roughly 31% of individuals are male, while 69% are female. The mean of the Number of Days Physical Health Not Good variable (PHYSHLTH) is about 15.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+library(ggplot2)
+library(dplyr)
+BRFSS <- read.csv("BRFSS.csv")
+cat("Number of observations in the BRFSS:",nrow(BRFSS))
+cat("\nNumber of variables in BRFSS:",ncol(BRFSS))
+
+# recode PHYSHLTH
+BRFSS$PHYSHLTH <- replace(BRFSS$PHYSHLTH, BRFSS$PHYSHLTH %in% c(88, 77, 99), NA)
+head(BRFSS$PHYSHLTH)
+
+# recode SEX
+BRFSS$SEX2 <- ifelse(BRFSS$SEX == 1, "Male", "Female")
+head(cbind(BRFSS$SEX2, BRFSS$SEX))
+
+# PHYSHLTH mean
+cat(mean(BRFSS$PHYSHLTH, na.rm = TRUE))
+
+# percentage of males and females
+prop.table(table(BRFSS$SEX2)) * 100
+```
+
+## Data Visualization
+
+The histogram shows a bimodal distribution, where there are two distinct peaks.
+which shows that the shape of the histogram is not normal, left-skewed, or right-skewed.
+Instead, it indicates a distribution that is skewed both to the left and right, suggesting the presence of two separate groups or categories within the data.
+
+The plot shows the distribution of "Physical Health" by gender.
+Males have a median around 14, while females have a median around 12.
+However, the minimum, maximum, and quartile values are similar for both genders, indicating a comparable spread of physical health observations.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+# Histogram
+ggplot(data=BRFSS) + aes(x=PHYSHLTH) + geom_histogram(fill="purple", color="blue", binwidth = 5)+
+   labs(title="Distribution of Number of Days Physical Health Not Good Variable",x="Physcial Health") + theme(plot.title = element_text(hjust = 0.5))
+
+# Boxplot
+ggplot(data = BRFSS, aes(x = PHYSHLTH, y = SEX2)) + geom_boxplot(fill = "cyan") +
+  labs(title = "Physical Health of Males and Females", x = "Physcial Health", y = "Gender") + theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+## Hypothesis Test
+
+Null hypothesis: The mean number of days of physical health not good is the same for males and females.
+
+Alternative hypothesis: The number of days of physical health not good is greater in males than in females.
+
+Alpha: 0.05 
+
+Type of test (upper, lower, two-sided): upper 
+
+P-value: 0.8804
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+t.test(BRFSS$PHYSHLTH ~ BRFSS$SEX2, alternative = "greater")
+```
+
+## Conclusion
+Based on the hypothesis test conducted at a significance level of 0.05 and using an upper-tailed test, we fail to reject the null hypothesis. This implies that there is insufficient evidence to conclude that the mean number of days of physical health not good is greater in males than in females. Therefore, we do not have statistical evidence to support the claim that males experience a greater number of days of poor physical health compared to females.
+Health practitioners can utilize these results to inform their interventions and health promotion strategies. If there were significant differences found between males and females, practitioners might tailor their interventions differently based on gender-specific health needs. However, since no significant difference was detected in this analysis, practitioners may focus on implementing interventions that target overall physical health improvement, irrespective of gender.
+The results of this analysis were somewhat unexpected. While there may have been prior assumptions or observations suggesting that males might experience more days of poor physical health, the statistical analysis did not support this claim. It's essential to rely on empirical evidence rather than assumptions when making decisions in healthcare.
+To expand on this analysis, future research could explore other demographic factors that might influence the number of days of poor physical health, such as age, socioeconomic status, or geographic location. Additionally, longitudinal studies could be conducted to observe changes in physical health over time within different demographic groups, providing more insights into the determinants of physical health disparities.
+
